@@ -1,162 +1,130 @@
+<div align="center">
+
 # 🐱 Lojinha do Logan
 
-![Java](https://img.shields.io/badge/Java-17+-ED8B00?style=for-the-badge&logo=java&logoColor=white)
-![Maven](https://img.shields.io/badge/Maven-Build%20Tool-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)
-![POO](https://img.shields.io/badge/POO-Programação%20Orientada%20a%20Objetos-blueviolet?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-Concluído-brightgreen?style=for-the-badge)
-![GitHub](https://img.shields.io/badge/GitHub-Portfólio-181717?style=for-the-badge&logo=github)
+Sistema de terminal em **Java puro** para gerenciar produtos e estoque de uma loja pet, com foco em Programação Orientada a Objetos e testes unitários.
 
-Projeto final do Bloco 01 desenvolvido em **Java**, com foco na aplicação dos principais conceitos de **Programação Orientada a Objetos (POO)**.
+![Java](https://img.shields.io/badge/Java-17+-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Maven](https://img.shields.io/badge/Maven-C71A36?style=for-the-badge&logo=apachemaven&logoColor=white)
+![JUnit 5](https://img.shields.io/badge/JUnit_5-25A162?style=for-the-badge&logo=junit5&logoColor=white)
+![POO](https://img.shields.io/badge/POO-Orientação_a_Objetos-blueviolet?style=for-the-badge)
 
-## 📌 Sobre o projeto
+[![CI](https://github.com/Day-Barbosa/lojinha-logan/actions/workflows/ci.yml/badge.svg)](https://github.com/Day-Barbosa/lojinha-logan/actions/workflows/ci.yml)
+![Testes](https://img.shields.io/badge/testes-16_passando-success)
+![Licença](https://img.shields.io/badge/licença-MIT-blue)
 
-A **Lojinha do Logan** é um sistema de gerenciamento de produtos para uma loja pet, executado pelo terminal.
+</div>
 
-O projeto permite realizar operações básicas de cadastro, listagem, busca, atualização, exclusão e controle de estoque de produtos, utilizando uma estrutura organizada em pacotes por responsabilidade.
+---
 
-A versão atual do projeto utiliza **Maven**, seguindo uma estrutura mais padronizada para projetos Java.
+## 💡 Sobre o projeto
 
-## 🚀 Funcionalidades
+Uma loja pequena precisa de um jeito simples de **cadastrar produtos e controlar o estoque sem vender o que não tem**. A Lojinha do Logan faz isso pelo terminal: CRUD de produtos, entrada e saída de estoque com validação de quantidade, e mensagens coloridas para guiar a pessoa usuária. O projeto foi a avaliação final do Bloco 1 (Java e POO) da formação Java Fullstack da Generation Brasil e depois ganhou Maven, testes automatizados e CI.
 
-- Cadastrar produtos
-- Listar todos os produtos cadastrados
-- Buscar produto por ID
-- Atualizar dados de um produto
-- Deletar produto
-- Registrar entrada de estoque
-- Registrar saída de estoque
-- Exibir menu interativo no terminal
-- Utilizar mensagens coloridas no console
+<!-- 📸 MÍDIA: grave o terminal (ex.: com asciinema ou um GIF do Windows Terminal) cadastrando um produto, listando e fazendo uma saída de estoque. Salve em docs/demo.gif e troque este comentário por:
+<p align="center"><img src="docs/demo.gif" alt="Lojinha do Logan rodando no terminal" width="700"></p>
+-->
 
-## 🧠 Conceitos aplicados
+## 🏗️ Arquitetura e decisões técnicas
 
-- Programação Orientada a Objetos
-- Classes e objetos
-- Encapsulamento
-- Herança
-- Polimorfismo
-- Classe abstrata
-- Interface
-- Collections com `ArrayList`
-- Tratamento de exceções personalizadas
-- Separação de responsabilidades em pacotes
-- Estruturação de projeto com Maven
+```mermaid
+classDiagram
+    direction LR
 
-## 🛠️ Tecnologias utilizadas
+    class ProdutoRepository {
+        <<interface>>
+        +cadastrar(Produto)
+        +listarTodos()
+        +buscarPorId(int) Produto
+        +atualizar(Produto)
+        +deletar(int)
+    }
 
-- Java 17
-- Maven
-- Eclipse / Spring Tool Suite
-- Git
-- GitHub
+    class ProdutoController {
+        -ArrayList~Produto~ listaProdutos
+        +entradaEstoque(int id, int qtd) String
+        +saidaEstoque(int id, int qtd) String
+    }
 
-## 📁 Estrutura do projeto
+    class Produto {
+        <<abstract>>
+        -int id
+        -String nome
+        -double preco
+        -int estoque
+        +entradaEstoque(int) String
+        +entradaEstoque(int, String) String
+        +saidaEstoque(int) String
+        +getTipo()* String
+        +visualizar()
+    }
 
-```text
-src/
-└── main/
-    └── java/
-        ├── Loja/
-        │   ├── Controller/
-        │   │   └── ProdutoController.java
-        │   │
-        │   ├── Exception/
-        │   │   └── ProdutoNaoEncontrado.java
-        │   │
-        │   ├── Model/
-        │   │   ├── Produto.java
-        │   │   └── ProdutoPet.java
-        │   │
-        │   ├── Repository/
-        │   │   └── ProdutoRepository.java
-        │   │
-        │   └── util/
-        │       └── Cores.java
-        │
-        └── Menu/
-            └── Menu_Logan.java
+    class ProdutoPet {
+        -String faseDaVida
+        -double pesoEmKg
+        +getTipo() String
+        +visualizar()
+    }
+
+    class ProdutoNaoEncontrado {
+        <<exception>>
+    }
+
+    class Menu_Logan {
+        +main(String[])
+    }
+
+    ProdutoRepository <|.. ProdutoController : implementa
+    Produto <|-- ProdutoPet : herda
+    ProdutoController o-- Produto : gerencia
+    ProdutoController ..> ProdutoNaoEncontrado : lança
+    Menu_Logan --> ProdutoController : usa
 ```
 
-## 📦 Organização dos pacotes
+| Conceito | Onde aparece |
+|---|---|
+| **Abstração** | `Produto` é abstrata e obriga cada subtipo a implementar `getTipo()` |
+| **Herança e polimorfismo** | `ProdutoPet` estende `Produto` e sobrescreve `visualizar()` |
+| **Sobrecarga** | `entradaEstoque(int)` e `entradaEstoque(int, String)` (com observação) |
+| **Interface como contrato** | `ProdutoRepository` define as operações; `ProdutoController` implementa |
+| **Exceção personalizada** | `ProdutoNaoEncontrado` (unchecked) é tratada no menu, sem derrubar o programa |
+| **Encapsulamento** | Atributos privados com getters e setters; o estoque só muda pelas regras de entrada e saída |
 
-### `Menu`
+## ✨ Funcionalidades
 
-Contém a classe principal do sistema, responsável por exibir o menu no terminal, receber as opções digitadas pela pessoa usuária e iniciar o fluxo da aplicação.
+- Cadastrar, listar, buscar por id, atualizar e excluir produtos
+- Entrada de estoque, com ou sem observação (ex.: número do lote)
+- Saída de estoque que **bloqueia venda acima do saldo**
+- Validação de quantidade zero ou negativa
+- Menu interativo com cores no terminal
 
-### `Loja.Model`
+## 🧪 Testes
 
-Contém as classes que representam os produtos do sistema.
+16 testes unitários com **JUnit 5**, rodando a cada push pelo GitHub Actions.
 
-- `Produto`: classe abstrata base para os produtos.
-- `ProdutoPet`: classe especializada que herda de `Produto`.
-
-### `Loja.Controller`
-
-Contém a classe responsável por controlar as operações do sistema, como cadastro, listagem, busca, atualização, exclusão e controle de estoque.
-
-### `Loja.Repository`
-
-Contém a interface que define o contrato das operações que devem ser implementadas pelo controller.
-
-### `Loja.Exception`
-
-Contém a exceção personalizada utilizada quando um produto não é encontrado.
-
-### `Loja.util`
-
-Contém recursos auxiliares do sistema, como a classe responsável por cores e mensagens no terminal.
-
-## ▶️ Como executar o projeto
-
-1. Clone o repositório:
+| Suíte | O que garante |
+|---|---|
+| `ProdutoTest` | soma e subtração de estoque, recusa de quantidade inválida, bloqueio de venda acima do saldo |
+| `ProdutoControllerTest` | busca, atualização (inclusive campos de `ProdutoPet`), exclusão e `ProdutoNaoEncontrado` para ids inexistentes |
 
 ```bash
-git clone https://github.com/Day-Barbosa/projeto_final_bloco_01.git
+./mvnw test
 ```
 
-2. Abra o projeto no **Eclipse** ou **Spring Tool Suite**.
+## 🚀 Como rodar localmente
 
-3. Importe o projeto como Maven:
-
-```text
-File > Import > Maven > Existing Maven Projects
-```
-
-4. Selecione a pasta do projeto e conclua a importação.
-
-5. Acesse a classe principal:
-
-```text
-src/main/java/Menu/Menu_Logan.java
-```
-
-6. Execute o método `main`.
-
-## ⚙️ Compilação com Maven
-
-Este projeto utiliza Maven para organização e compilação.
-
-Para compilar pelo terminal, execute:
+**Pré-requisito:** Java 17 ou superior. O Maven Wrapper baixa o Maven sozinho.
 
 ```bash
-mvn clean compile
+git clone https://github.com/Day-Barbosa/lojinha-logan.git
+cd lojinha-logan
+./mvnw compile                                      # Windows: mvnw.cmd compile
+java -cp target/classes Menu.Menu_Logan
 ```
 
-Também é possível compilar pelo Spring Tool Suite:
+**No Eclipse / Spring Tool Suite:** `File > Import > Maven > Existing Maven Projects`, selecione a pasta e execute `src/main/java/Menu/Menu_Logan.java`.
 
-```text
-Run As > Maven build... > Goals: clean compile
-```
-
-Ao compilar corretamente, o Maven exibirá a mensagem:
-
-```text
-BUILD SUCCESS
-```
-
-## 💻 Exemplo de menu
-
-Ao executar o sistema, o terminal exibe opções como:
+### Exemplo de menu
 
 ```text
 1 | Cadastrar Produto
@@ -164,25 +132,36 @@ Ao executar o sistema, o terminal exibe opções como:
 3 | Buscar Produto por ID
 4 | Atualizar Produto
 5 | Deletar Produto
-6 | Saída de Produto
+6 | Saida de Produto
 7 | Atualizar Estoque
 0 | Sair
 ```
 
-## 📚 Aprendizados
+## 📁 Estrutura
 
-Durante o desenvolvimento deste projeto, foram praticados conceitos fundamentais de Java e Programação Orientada a Objetos, com foco em organização de código, reutilização, criação de classes, uso de interface, herança, tratamento de exceções e manipulação de listas em memória.
+```text
+src/
+├── main/java/
+│   ├── Loja/
+│   │   ├── Controller/   # ProdutoController (regras e lista em memória)
+│   │   ├── Exception/    # ProdutoNaoEncontrado
+│   │   ├── Model/        # Produto (abstrata) e ProdutoPet
+│   │   ├── Repository/   # Interface ProdutoRepository
+│   │   └── util/         # Cores do terminal
+│   └── Menu/             # Menu_Logan (main)
+└── test/java/Loja/       # Testes JUnit 5
+```
 
-A conversão para Maven também permitiu aplicar uma estrutura mais próxima do padrão utilizado em projetos Java profissionais.
+## 🗺️ Próximos passos
 
-## 👩‍💻 Desenvolvedora
+- [ ] Renomear pacotes para o padrão Java em minúsculas (`loja.controller`...)
+- [ ] Trocar `double` por `BigDecimal` no preço
+- [ ] Persistir os produtos em arquivo ou banco
 
-**Dayana Barbosa**
+## 👩‍💻 Autora
 
-Desenvolvedora Java em formação, com foco em desenvolvimento back-end, Programação Orientada a Objetos, SQL e boas práticas de organização de código.
+**Dayana Barbosa** · [LinkedIn](https://www.linkedin.com/in/dayanabarbosa-devjava/) · [GitHub](https://github.com/Day-Barbosa)
 
-https://github.com/Day-Barbosa/projeto_final_bloco_01/tree/mavenizacao
+---
 
-## 📄 Licença
-
-Este projeto foi desenvolvido para fins educacionais.
+<sub>Distribuído sob a licença MIT. Veja [`LICENSE`](LICENSE). Supervisão técnica: Logan 🐈.</sub>
